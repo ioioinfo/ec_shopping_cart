@@ -69,7 +69,9 @@ server.register([
 	{
 	  register: require('./server/controller/collects_controller.js')
 	},
-
+	{
+	  register: require('./server/controller/ec_shoppingcart_controller.js')
+	},
 
 
 ], function () {

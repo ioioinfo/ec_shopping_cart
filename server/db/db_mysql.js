@@ -9,7 +9,7 @@ exports.register = function(server, options, next){
   	port            :  3306,
   	user            : 'root',
   	password        : 'root',
-  	database        : 'ec_basic',
+  	database        : 'ec_product',
   	charset         : 'utf8_general_ci'
 	});
 

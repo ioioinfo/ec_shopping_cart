@@ -22,7 +22,7 @@ exports.register = function(server, options, next){
 
 	//通过商品id找到商品
 	var find_product_byId = function(product_id, cb){
-		var url = "http://127.0.0.1:7000/product_info?product_id=";
+		var url = "http://127.0.0.1:18002/product_info?product_id=";
 		url = url + product_id;
 		do_get_method(url,cb);
 	};

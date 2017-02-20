@@ -12,7 +12,6 @@ var shopping_carts = function(server) {
 				?,?,?,?,now(),now(),0)`;
 				console.log(query);
 			var columns=[product_id, per_price, total_items, total_prices,cart_code,person_id];
-
 			server.plugins['mysql'].pool.getConnection(function(err, connection) {
 				connection.query(query, columns, function(err, results) {
 					connection.release();
@@ -108,9 +107,154 @@ var shopping_carts = function(server) {
 				});
 			});
 		},
-
-
-
+		//查询时候有cart_code
+		search_cart_code : function(cart_code,cb) {
+			var query = `select id,product_id,total_items FROM shopping_carts
+			where cart_code =? and flag =0 and person_id is null`;
+			server.plugins['mysql'].pool.getConnection(function(err, connection) {
+				connection.query(query, [cart_code], function(err, results) {
+					connection.release();
+					if (err) {
+						console.log(err);
+						cb(true,results);
+					}
+					cb(false,results);
+				});
+			});
+		},
+		//查询时候有shopping carte
+		search_shopping_cart : function(person_id,cb) {
+			var query = `select id,product_id,total_items FROM shopping_carts
+			where person_id =? and flag =0`;
+			server.plugins['mysql'].pool.getConnection(function(err, connection) {
+				connection.query(query, [person_id], function(err, results) {
+					connection.release();
+					if (err) {
+						console.log(err);
+						cb(true,results);
+					}
+					cb(false,results);
+				});
+			});
+		},
+		//有人更新购物车信息
+		update_person_cart : function(id,total_items,total_prices, cb) {
+			var query = `update shopping_carts set total_items=?,total_prices=?,updated_at=now()
+				where id =? and flag =0`;
+			var columns=[total_items,total_prices,id];
+			console.log(query);
+			server.plugins['mysql'].pool.getConnection(function(err, connection) {
+				connection.query(query, columns, function(err, results) {
+					connection.release();
+					if (err) {
+						console.log(err);
+						cb(true,results);
+						return;
+					}
+					cb(false,results);
+				});
+			});
+		},
+		//更新之前有产品id的购物车信息
+		update_cart_info : function(id,per_price,total_items,total_prices,cb) {
+			var query = `update shopping_carts set per_price=?,total_items=?,
+				total_prices = ?,updated_at=now() where id = ? and flag =0`;
+			var columns=[per_price,total_items,total_prices,id];
+			console.log(columns);
+			console.log(query);
+			server.plugins['mysql'].pool.getConnection(function(err, connection) {
+				connection.query(query, columns, function(err, results) {
+					connection.release();
+					if (err) {
+						console.log(err);
+						cb(true,results);
+						return;
+					}
+					cb(false,results);
+				});
+			});
+		},
+		//更新之前没有产品id的购物车信息
+		update_cart_info2 : function(id,per_price,total_items,total_prices,cb) {
+			var query = `update shopping_carts set per_price=?,total_items=?,
+				total_prices = ?,updated_at=now() where id = ? and flag =0`;
+			var columns=[per_price,total_items,total_prices,id];
+			console.log(columns);
+			console.log(query);
+			server.plugins['mysql'].pool.getConnection(function(err, connection) {
+				connection.query(query, columns, function(err, results) {
+					connection.release();
+					if (err) {
+						console.log(err);
+						cb(true,results);
+						return;
+					}
+					cb(false,results);
+				});
+			});
+		},
+		//登入合并所有没有产品的人id
+		update_person_id :function(person_id,ids,cb) {
+			var query = `update shopping_carts set person_id=?,updated_at=now()
+			 	where id in (?) and flag = 0`;
+			var columns=[person_id,ids];
+			server.plugins['mysql'].pool.getConnection(function(err, connection) {
+				connection.query(query, columns, function(err, results) {
+					connection.release();
+					if (err) {
+						console.log(err);
+						cb(true,results);
+						return;
+					}
+					cb(false,results);
+				});
+			});
+		},
+		//登入删除没有人id的购物车
+		delete_carts:function(ids,cb){
+			var query = `delete from shopping_carts where id in (?)`;
+			server.plugins['mysql'].pool.getConnection(function(err, connection) {
+				connection.query(query, [ids], function(err, results) {
+					connection.release();
+					if (err) {
+						console.log(err);
+						cb(true,results);
+						return;
+					}
+					cb(false,results);
+				});
+			});
+		},
+		//查询购物车的所有
+		search_all_cart : function(person_id,cb) {
+			var query = `select id,product_id,total_items,person_id,per_price,total_items,
+			total_prices FROM shopping_carts where person_id=?`;
+			server.plugins['mysql'].pool.getConnection(function(err, connection) {
+				connection.query(query, [person_id], function(err, results) {
+					connection.release();
+					if (err) {
+						console.log(err);
+						cb(true,results);
+					}
+					cb(false,results);
+				});
+			});
+		},
+		//查询当前cart_code所有商品
+		search_products_by_cart: function(cart_code,person_id,cb) {
+			var query = `select id,product_id,total_items,person_id,per_price,total_items,
+			total_prices,cart_code FROM shopping_carts where cart_code=? or person_id=?`;
+			server.plugins['mysql'].pool.getConnection(function(err, connection) {
+				connection.query(query, [cart_code,person_id], function(err, results) {
+					connection.release();
+					if (err) {
+						console.log(err);
+						cb(true,results);
+					}
+					cb(false,results);
+				});
+			});
+		},
 	};
 };
 
