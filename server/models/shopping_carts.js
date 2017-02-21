@@ -255,6 +255,24 @@ var shopping_carts = function(server) {
 				});
 			});
 		},
+		//得到无人购物车信息
+		search_cart_by_code: function(cart_code,cb) {
+			var query = `select id,product_id,total_items,person_id,per_price,total_items,
+			total_prices,cart_code FROM shopping_carts where cart_code=?`;
+			server.plugins['mysql'].pool.getConnection(function(err, connection) {
+				connection.query(query, [cart_code], function(err, results) {
+					connection.release();
+					if (err) {
+						console.log(err);
+						cb(true,results);
+					}
+					cb(false,results);
+				});
+			});
+		},
+
+
+
 	};
 };
 

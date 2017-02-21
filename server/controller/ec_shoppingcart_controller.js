@@ -36,6 +36,12 @@ var do_result = function(err,result,cb){
 		cb(true,null);
 	}
 };
+//查询产品信息
+var search_products_list = function(product_ids,cb){
+	var url = "http://127.0.0.1:18002/find_products_with_picture?product_ids=";
+	url = url + product_ids;
+	do_get_method(url,cb);
+};
 exports.register = function(server, options, next){
 	//新增购物车
 	var add_shopping_cart = function(product_id, per_price, total_items, total_prices, cart_code,person_id,cb){
@@ -247,6 +253,44 @@ exports.register = function(server, options, next){
 				});
 			}
 		},
+		//得到无人的购物车
+		{
+			method: 'GET',
+			path: '/find_none_person_cart',
+			handler: function(request, reply){
+				var cart_code = request.query.cart_code;
+				server.plugins['models'].shopping_carts.search_cart_by_code(cart_code,function(err,results){
+					if (!err) {
+						if (results.length ==0) {
+							return reply({"success":true,"message":"ok","shopping_carts":{},"service_info":service_info});
+						}
+						var product_ids = [];
+						for (var i = 0; i < results.length; i++) {
+							product_ids.push(results[i].product_id);
+						}
+						search_products_list(JSON.stringify(product_ids),function(err,content){
+							if (!err) {
+								var products_map = {};
+								for (var i = 0; i < content.products.length; i++) {
+									var product = content.products[i];
+									products_map[product.id] = product;
+								}
+								return reply({"success":true,"shopping_carts":results,"products":products_map,"message":"ok","service_info":service_info});
+							}else {
+								return reply({"success":false,"message":"error","service_info":service_info});
+							}
+						});
+
+					}else {
+						return reply({"success":false,"message":results.message,"service_info":service_info});
+					}
+				});
+			}
+		},
+
+
+
+
 
 	]);
 
