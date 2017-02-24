@@ -258,7 +258,7 @@ var shopping_carts = function(server) {
 		//得到无人购物车信息
 		search_cart_by_code: function(cart_code,cb) {
 			var query = `select id,product_id,total_items,person_id,per_price,total_items,
-			total_prices,cart_code FROM shopping_carts where cart_code=?`;
+			total_prices,cart_code,is_selected FROM shopping_carts where cart_code=?`;
 			server.plugins['mysql'].pool.getConnection(function(err, connection) {
 				connection.query(query, [cart_code], function(err, results) {
 					connection.release();
@@ -270,8 +270,69 @@ var shopping_carts = function(server) {
 				});
 			});
 		},
-
-
+		//得到有人购物车信息
+		search_cart_by_person: function(person_id,cb) {
+			var query = `select id,product_id,total_items,person_id,per_price,total_items,
+			total_prices,cart_code,is_selected FROM shopping_carts where person_id=?`;
+			server.plugins['mysql'].pool.getConnection(function(err, connection) {
+				connection.query(query, [person_id], function(err, results) {
+					connection.release();
+					if (err) {
+						console.log(err);
+						cb(true,results);
+					}
+					cb(false,results);
+				});
+			});
+		},
+		//更新购物车商品选中状态
+		update_cart_selected:function(selected,ids,cb) {
+			var query = `update shopping_carts a set a.is_selected=?, a.updated_at=now()
+			 	where a.id in (?) and a.flag = 0`;
+			var columns=[selected,ids];
+			console.log("columns:"+JSON.stringify(columns));
+			server.plugins['mysql'].pool.getConnection(function(err, connection) {
+				connection.query(query, columns, function(err, results) {
+					connection.release();
+					if (err) {
+						console.log(err);
+						cb(true,results);
+						return;
+					}
+					cb(false,results);
+				});
+			});
+		},
+		//查询被选中的商品
+		search_carts_by_selected: function(person_id,cb) {
+			var query = `select id,product_id,total_items,person_id,per_price,total_items,
+			total_prices,cart_code,is_selected FROM shopping_carts where person_id=? and is_selected = 1`;
+			server.plugins['mysql'].pool.getConnection(function(err, connection) {
+				connection.query(query, [person_id], function(err, results) {
+					connection.release();
+					if (err) {
+						console.log(err);
+						cb(true,results);
+					}
+					cb(false,results);
+				});
+			});
+		},
+		//更加cart ids查找选中商品
+		search_carts_by_ids: function(ids,cb) {
+			var query = `select id,product_id,total_items,person_id,per_price,total_items,
+			total_prices,cart_code,is_selected FROM shopping_carts where id in (?) and flag = 0`;
+			server.plugins['mysql'].pool.getConnection(function(err, connection) {
+				connection.query(query, [ids], function(err, results) {
+					connection.release();
+					if (err) {
+						console.log(err);
+						cb(true,results);
+					}
+					cb(false,results);
+				});
+			});
+		},
 
 	};
 };
