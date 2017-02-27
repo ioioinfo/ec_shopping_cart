@@ -24,7 +24,6 @@ var shopping_carts = function(server) {
 				});
 			});
 		},
-
 		//无人登入 查询购物车商品是否存在，同cookie
 		find_same_product : function(product_id, cart_code,cb) {
 			var query = `select total_items FROM shopping_carts where product_id =? and cart_code =? and flag =0`;
@@ -61,11 +60,27 @@ var shopping_carts = function(server) {
 			});
 		},
 		//查看购物车商品总数
-		find_shopping_items : function(cb) {
-			var query = `select sum(total_items) num from shopping_carts `;
+		find_shopping_items_person : function(person_id,cb) {
+			var query = `select sum(total_items) num from shopping_carts where person_id =?`;
 			console.log(query);
 			server.plugins['mysql'].pool.getConnection(function(err, connection) {
-				connection.query(query, function(err, results) {
+				connection.query(query,[person_id], function(err, results) {
+					connection.release();
+					if (err) {
+						console.log(err);
+						cb(true,results);
+						return;
+					}
+					cb(false,results);
+				});
+			});
+		},
+		//查看购物车商品总数
+		find_shopping_items_cart : function(cart_code,cb) {
+			var query = `select sum(total_items) num from shopping_carts where cart_code =?`;
+			console.log(query);
+			server.plugins['mysql'].pool.getConnection(function(err, connection) {
+				connection.query(query, [cart_code],function(err, results) {
 					connection.release();
 					if (err) {
 						console.log(err);
