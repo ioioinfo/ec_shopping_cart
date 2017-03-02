@@ -250,8 +250,12 @@ exports.register = function(server, options, next){
 						var shopping_carts = results;
 						var total_prices;
 						var all_items = parseInt(total_items);
-						console.log("results.length:"+JSON.stringify(results));
-						if (results.length == 0) {
+						var product_map = {};
+						for (var i = 0; i < shopping_carts.length; i++) {
+							product_map[shopping_carts[i].product_id] = shopping_carts[i];
+							all_items = all_items + shopping_carts[i].total_items;
+						}
+						if (!product_map[product_id]) {
 							total_prices = per_price * total_items;
 							add_shopping_cart(product_id,per_price,total_items,total_prices,cart_code,person_id,
 								function(err,result){
@@ -268,7 +272,6 @@ exports.register = function(server, options, next){
 									total_items = parseInt(total_items) + shopping_carts[i].total_items;
 									id = shopping_carts[i].id;
 								}
-								all_items = all_items + shopping_carts[i].total_items;
 							}
 							total_prices = per_price * total_items;
 							server.plugins['models'].shopping_carts.update_person_cart(id,total_items,total_prices,function(err,results){
