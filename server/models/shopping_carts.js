@@ -258,9 +258,22 @@ var shopping_carts = function(server) {
 		//查询当前cart_code所有商品
 		search_products_by_cart: function(cart_code,person_id,cb) {
 			var query = `select id,product_id,total_items,person_id,per_price,total_items,
-			total_prices,cart_code FROM shopping_carts where cart_code=? or person_id=?`;
+				total_prices,cart_code,is_selected
+				FROM shopping_carts
+				where
+			`;
+
+			var params;
+			if (person_id) {
+				query = query + ` person_id=? `;
+				params = [person_id];
+			} else {
+				query = query + ` cart_code=? `;
+				params = [cart_code];
+			}
+
 			server.plugins['mysql'].pool.getConnection(function(err, connection) {
-				connection.query(query, [cart_code,person_id], function(err, results) {
+				connection.query(query, params, function(err, results) {
 					connection.release();
 					if (err) {
 						console.log(err);
@@ -319,11 +332,23 @@ var shopping_carts = function(server) {
 			});
 		},
 		//查询被选中的商品
-		search_carts_by_selected: function(person_id,cb) {
+		search_carts_by_selected: function(cart_code,person_id,cb) {
 			var query = `select id,product_id,total_items,person_id,per_price,total_items,
-			total_prices,cart_code,is_selected FROM shopping_carts where person_id=? and is_selected = 1`;
+				total_prices,cart_code,is_selected FROM shopping_carts
+				where is_selected = 1 and
+			`;
+
+			var params;
+			if (person_id) {
+				query = query + ` person_id=? `;
+				params = [person_id];
+			} else {
+				query = query + ` cart_code=? `;
+				params = [cart_code];
+			}
+
 			server.plugins['mysql'].pool.getConnection(function(err, connection) {
-				connection.query(query, [person_id], function(err, results) {
+				connection.query(query, params, function(err, results) {
 					connection.release();
 					if (err) {
 						console.log(err);

@@ -403,14 +403,15 @@ exports.register = function(server, options, next){
 				var ids = request.payload.ids;
 				var selected = request.payload.selected;
 				var person_id = request.payload.person_id;
-				if (!ids || !selected || !person_id) {
+				var cart_code = request.payload.cart_code;
+				if (!ids || !selected || (!person_id && !cart_code)) {
 					return reply({"success":false,"message":"params wrong","service_info":service_info});
 				}
 				server.plugins['models'].shopping_carts.update_cart_selected(selected,JSON.parse(ids),function(err,results){
 					if (!err) {
-						server.plugins['models'].shopping_carts.search_cart_by_person(person_id,function(err,results){
+						server.plugins['models'].shopping_carts.search_products_by_cart(cart_code,person_id,function(err,results){
 							if (!err) {
-								server.plugins['models'].shopping_carts.search_carts_by_selected(person_id,function(err,content){
+								server.plugins['models'].shopping_carts.search_carts_by_selected(cart_code,person_id,function(err,content){
 									if (!err) {
 										var total_data = {};
 										total_data.total_prices = 0;
