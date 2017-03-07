@@ -570,9 +570,37 @@ exports.register = function(server, options, next){
 				});
 			}
 		},
-
+		//购物车 数量修改
+		{
+			method: 'GET',
+			path: '/update_shopping_carts',
+			handler: function(request, reply){
+				var ids = request.query.ids;
+				var num = request.query.num;
+				if (!ids ||!num) {
+					return reply({"success":false,"message":"params wrong","service_info":service_info});
+				}
+				server.plugins['models'].shopping_carts.search_carts_by_ids(JSON.parse(ids),function(err,results){
+					if (!err) {
+						var cart = results[0];
+						var id = cart.id;
+						var per_price = cart.per_price;
+						var total_items = num;
+						var total_prices = per_price*num;
+						server.plugins['models'].shopping_carts.update_cart_info(id,per_price,total_items,total_prices,function(err,results){
+							if (!err) {
+								return reply({"success":true,"message":"ok","service_info":service_info});
+							}else {
+								return reply({"success":false,"message":err,"service_info":service_info});
+							}
+						});
+					}else {
+						return reply({"success":false,"message":results.message,"service_info":service_info});
+					}
+				});
+			}
+		},
 	]);
-
     next();
 };
 
