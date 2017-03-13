@@ -241,15 +241,19 @@ var shopping_carts = function(server) {
 			});
 		},
 		//查询购物车的所有
-		search_all_cart : function(person_id,cb) {
+		search_all_cart : function(cart_code,person_id,cb) {
 			var query = `select id,product_id,total_items,person_id,per_price,total_items,
-			total_prices FROM shopping_carts where person_id=?`;
+				total_prices,cart_code,is_selected
+				FROM shopping_carts
+				where person_id=? or cart_code=?
+			`;
 			server.plugins['mysql'].pool.getConnection(function(err, connection) {
-				connection.query(query, [person_id], function(err, results) {
+				connection.query(query, [person_id,cart_code], function(err, results) {
 					connection.release();
 					if (err) {
 						console.log(err);
-						cb(true,results);
+						cb(true,null);
+						return;
 					}
 					cb(false,results);
 				});

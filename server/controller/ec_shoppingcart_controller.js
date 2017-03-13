@@ -298,7 +298,7 @@ exports.register = function(server, options, next){
 				if (!person_id || !cart_code) {
 					return reply({"success":false,"message":"params wrong","service_info":service_info});
 				}
-				server.plugins['models'].shopping_carts.search_products_by_cart(cart_code,person_id,function(err,results){
+				server.plugins['models'].shopping_carts.search_all_cart(cart_code,person_id,function(err,results){
 					if (!err) {
 						var no_persons = [];
 						var has_person = {};
