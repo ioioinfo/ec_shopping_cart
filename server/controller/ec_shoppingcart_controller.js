@@ -198,13 +198,18 @@ exports.register = function(server, options, next){
 						var person_id;
 						var total_prices;
 						var all_items = parseInt(total_items);
-						var param = 0;
-						if (results.length == 0) {
+
+						var product_map = {};
+						for (var i = 0; i < shopping_carts.length; i++) {
+							product_map[shopping_carts[i].product_id] = shopping_carts[i];
+							all_items = all_items + shopping_carts[i].total_items;
+						}
+						if (!product_map[product_id]) {
 							total_prices = per_price * total_items;
 							add_shopping_cart(product_id,per_price,total_items,total_prices,cart_code,person_id,
 								function(err,result){
 									if (result.affectedRows>0) {
-										return reply({"success":true,"message":"ok","param":param,"all_items":all_items,"service_info":service_info});
+										return reply({"success":true,"all_items":all_items,"service_info":service_info});
 									}else {
 										return reply({"success":false,"message":"add none_person_cart fail","service_info":service_info});
 									}
