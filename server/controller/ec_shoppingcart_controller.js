@@ -75,8 +75,8 @@ var search_cart_products_list = function(shopping_carts,cb) {
 
 exports.register = function(server, options, next){
 	//新增购物车
-	var add_shopping_cart = function(product_id, per_price, total_items, total_prices, cart_code,person_id,cb){
-		server.plugins['models'].shopping_carts.add_shopping_cart(product_id, per_price, total_items, total_prices, cart_code,person_id,function(err,results){
+	var add_shopping_cart = function(product_id, per_price, total_items, total_prices, cart_code,person_id,sku_id,cb){
+		server.plugins['models'].shopping_carts.add_shopping_cart(product_id, per_price, total_items, total_prices, cart_code,person_id,sku_id,function(err,results){
 			cb(err,results);
 		});
 	};
@@ -189,7 +189,8 @@ exports.register = function(server, options, next){
 				var product_id = request.payload.product_id;
 				var total_items = request.payload.product_num;
 				var per_price = request.payload.product_price;
-				if (!cart_code || !product_id || !total_items || !per_price) {
+				var sku_id = request.payload.sku_id;
+				if (!cart_code || !product_id || !total_items || !per_price || !sku_id) {
 					return reply({"success":false,"message":"params wrong","service_info":service_info});
 				}
 				server.plugins['models'].shopping_carts.search_cart_code(cart_code,function(err,results){
@@ -206,7 +207,7 @@ exports.register = function(server, options, next){
 						}
 						if (!product_map[product_id]) {
 							total_prices = per_price * total_items;
-							add_shopping_cart(product_id,per_price,total_items,total_prices,cart_code,person_id,
+							add_shopping_cart(product_id,per_price,total_items,total_prices,cart_code,person_id,sku_id,
 								function(err,result){
 									if (result.affectedRows>0) {
 										return reply({"success":true,"all_items":all_items,"service_info":service_info});
@@ -246,11 +247,12 @@ exports.register = function(server, options, next){
 				var product_id = request.payload.product_id;
 				var total_items = request.payload.product_num;
 				var per_price = request.payload.product_price;
+				var sku_id = request.payload.sku_id;
 				var cart_code;
-				if (!person_id || !product_id || !total_items || !per_price) {
+				if (!person_id || !product_id || !total_items || !per_price || !sku_id) {
 					return reply({"success":false,"message":"params wrong","service_info":service_info});
 				}
-				server.plugins['models'].shopping_carts.search_shopping_cart(person_id,function(err,results){
+				server.plugins['models'].shopping_carts.search_shopping_cart(person_id,sku_id,function(err,results){
 					if (!err) {
 						var shopping_carts = results;
 						var total_prices;
@@ -260,9 +262,10 @@ exports.register = function(server, options, next){
 							product_map[shopping_carts[i].product_id] = shopping_carts[i];
 							all_items = all_items + shopping_carts[i].total_items;
 						}
+
 						if (!product_map[product_id]) {
 							total_prices = per_price * total_items;
-							add_shopping_cart(product_id,per_price,total_items,total_prices,cart_code,person_id,
+							add_shopping_cart(product_id,per_price,total_items,total_prices,cart_code,person_id,sku_id,
 								function(err,result){
 									if (result.affectedRows>0) {
 										return reply({"success":true,"all_items":all_items,"service_info":service_info});

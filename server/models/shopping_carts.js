@@ -4,14 +4,16 @@ var EventProxy = require('eventproxy');
 var shopping_carts = function(server) {
 	return {
 		//无人购物车
-		add_shopping_cart : function(product_id, per_price, total_items, total_prices, cart_code,person_id,cb) {
+		add_shopping_cart : function(product_id, per_price, total_items, total_prices, cart_code,person_id,sku_id,cb) {
 			var query = `insert into shopping_carts (id, product_id, per_price,
-				total_items, total_prices, cart_code, person_id,created_at, updated_at, flag)
+				total_items, total_prices, cart_code, person_id,sku_id,
+				created_at, updated_at, flag)
 				values
 				(uuid(),?,?,
-				?,?,?,?,now(),now(),0)`;
+				?,?,?,?,?,
+				now(),now(),0)`;
 				console.log(query);
-			var columns=[product_id, per_price, total_items, total_prices,cart_code,person_id];
+			var columns=[product_id, per_price, total_items, total_prices,cart_code,person_id,sku_id];
 			server.plugins['mysql'].pool.getConnection(function(err, connection) {
 				connection.query(query, columns, function(err, results) {
 					connection.release();
@@ -138,11 +140,11 @@ var shopping_carts = function(server) {
 			});
 		},
 		//查询时候有shopping carte
-		search_shopping_cart : function(person_id,cb) {
-			var query = `select id,product_id,total_items FROM shopping_carts
-			where person_id =? and flag =0`;
+		search_shopping_cart : function(person_id,sku_id,cb) {
+			var query = `select id,product_id,sku_id,total_items FROM shopping_carts
+			where person_id =? and flag =0 and sku_id =?`;
 			server.plugins['mysql'].pool.getConnection(function(err, connection) {
-				connection.query(query, [person_id], function(err, results) {
+				connection.query(query, [person_id,sku_id], function(err, results) {
 					connection.release();
 					if (err) {
 						console.log(err);
@@ -365,7 +367,7 @@ var shopping_carts = function(server) {
 		//更加cart ids查找选中商品
 		search_carts_by_ids: function(ids,cb) {
 			var query = `select id,product_id,total_items,person_id,per_price,total_items,
-			total_prices,cart_code,is_selected FROM shopping_carts where id in (?) and flag = 0`;
+			total_prices,cart_code,is_selected,sku_id FROM shopping_carts where id in (?) and flag = 0`;
 			server.plugins['mysql'].pool.getConnection(function(err, connection) {
 				connection.query(query, [ids], function(err, results) {
 					connection.release();
