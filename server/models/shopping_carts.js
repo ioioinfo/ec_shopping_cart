@@ -126,7 +126,7 @@ var shopping_carts = function(server) {
 		},
 		//查询时候有cart_code
 		search_cart_code : function(cart_code,cb) {
-			var query = `select id,product_id,total_items FROM shopping_carts
+			var query = `select id,product_id,total_items,sku_id FROM shopping_carts
 			where cart_code =? and flag =0 and person_id is null`;
 			server.plugins['mysql'].pool.getConnection(function(err, connection) {
 				connection.query(query, [cart_code], function(err, results) {
@@ -141,7 +141,7 @@ var shopping_carts = function(server) {
 		},
 		//查询时候有shopping carte
 		search_shopping_cart : function(person_id,sku_id,cb) {
-			var query = `select id,product_id,sku_id,total_items FROM shopping_carts
+			var query = `select id,product_id,sku_id,total_items,sku_id FROM shopping_carts
 			where person_id =? and flag =0 and sku_id =?`;
 			server.plugins['mysql'].pool.getConnection(function(err, connection) {
 				connection.query(query, [person_id,sku_id], function(err, results) {
