@@ -62,9 +62,11 @@ var search_cart_products_list = function(shopping_carts,cb) {
 			var total_data = {};
 			total_data.total_prices = 0;
 			total_data.total_items = 0;
+			total_data.total_weight = 0;
 			for (var i = 0; i < carts_selected.length; i++) {
 				total_data.total_items = total_data.total_items + carts_selected[i].total_items;
 				total_data.total_prices = total_data.total_prices + carts_selected[i].total_items * carts_selected[i].per_price;
+				total_data.total_weight = total_data.total_weight + products_map[carts_selected[i].product_id].weight * carts_selected[i].total_items;
 			}
 			cb(false,{"message":"ok","shopping_carts":shopping_carts,"products":products_map,"total_data":total_data});
 		}else {
