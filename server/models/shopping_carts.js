@@ -242,6 +242,31 @@ var shopping_carts = function(server) {
 				});
 			});
 		},
+		//删除购物车
+		delete_shopping_carts2:function(person_id,cart_code,cb){
+			var query = `delete from shopping_carts where flag = 0`;
+			var columns = [];
+			if (person_id!="") {
+				query = query + " and person_id = ?";
+				columns.push(person_id);
+			}else {
+				query = query + " and cart_code = ?";
+				columns.push(cart_code);
+			}
+
+			server.plugins['mysql'].pool.getConnection(function(err, connection) {
+				connection.query(query, columns, function(err, results) {
+					connection.release();
+					if (err) {
+						console.log(err);
+						cb(true,results);
+						return;
+					}
+					cb(false,results);
+				});
+			});
+		},
+
 		//查询购物车的所有
 		search_all_cart : function(cart_code,person_id,cb) {
 			var query = `select id,product_id,total_items,person_id,per_price,total_items,

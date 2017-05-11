@@ -491,6 +491,31 @@ exports.register = function(server, options, next){
 				});
 			}
 		},
+		//删除所有购物车的商品
+		{
+			method: 'POST',
+			path: '/delete_shopping_carts2',
+			handler: function(request, reply){
+				var person_id = "";
+				var cart_code = "";
+				if (request.payload.person_id!="") {
+					person_id = request.payload.person_id
+				}else if (request.payload.cart_code!="") {
+					cart_code = request.payload.cart_code;
+				}else {
+					return reply({"success":false,"message":"params is null","service_info":service_info})
+				}
+				console.log("person_id:"+person_id);
+				console.log("cart_code:"+cart_code);
+				server.plugins['models'].shopping_carts.delete_shopping_carts2(person_id,cart_code,function(err,results){
+					if (!err) {
+						return reply({"success":true,"service_info":service_info});
+					}else {
+						return reply({"success":false,"message":results.message,"service_info":service_info});
+					}
+				});
+			}
+		},
 		//购物车 商品数量 +1
 		{
 			method: 'GET',
