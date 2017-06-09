@@ -406,6 +406,48 @@ exports.register = function(server, options, next){
 			}
 		},
 		//选中，更新选中的商品状态，或者取消选中状态，统计所有选中的商品价格，数量
+		// {
+		// 	method: 'POST',
+		// 	path: '/update_selected',
+		// 	handler: function(request, reply){
+		// 		var ids = request.payload.ids;
+		// 		var selected = request.payload.selected;
+		// 		var person_id = request.payload.person_id;
+		// 		var cart_code = request.payload.cart_code;
+		// 		if (!ids || !selected || (!person_id && !cart_code)) {
+		// 			return reply({"success":false,"message":"params wrong","service_info":service_info});
+		// 		}
+		// 		server.plugins['models'].shopping_carts.update_cart_selected(selected,JSON.parse(ids),function(err,results){
+		// 			if (!err) {
+		// 				server.plugins['models'].shopping_carts.search_products_by_cart(cart_code,person_id,function(err,results){
+		// 					if (!err) {
+		// 						server.plugins['models'].shopping_carts.search_carts_by_selected(cart_code,person_id,function(err,content){
+		// 							if (!err) {
+		// 								var total_data = {};
+		// 								total_data.total_prices = 0;
+		// 								total_data.total_items = 0;
+		// 								if (content.length == 0) {
+		// 									return reply({"success":true,"message":"ok","service_info":service_info,"shopping_carts":results,"total_data":total_data});
+		// 								}
+		// 								for (var i = 0; i < content.length; i++) {
+		// 									total_data.total_items = total_data.total_items + content[i].total_items;
+		// 									total_data.total_prices = total_data.total_prices + content[i].total_items * content[i].per_price;
+		// 								}
+		// 								return reply({"success":true,"message":"ok","service_info":service_info,"shopping_carts":results,"total_data":total_data});
+		// 							}else {
+		// 								return reply({"success":false,"message":results.message,"service_info":service_info});
+		// 							}
+		// 						});
+		// 					}else {
+		// 						return reply({"success":false,"message":results.message,"service_info":service_info});
+		// 					}
+		// 				});
+		// 			}else {
+		// 				return reply({"success":false,"message":results.message,"service_info":service_info});
+		// 			}
+		// 		});
+		// 	}
+		// },
 		{
 			method: 'POST',
 			path: '/update_selected',
@@ -421,21 +463,11 @@ exports.register = function(server, options, next){
 					if (!err) {
 						server.plugins['models'].shopping_carts.search_products_by_cart(cart_code,person_id,function(err,results){
 							if (!err) {
-								server.plugins['models'].shopping_carts.search_carts_by_selected(cart_code,person_id,function(err,content){
+								search_cart_products_list(results,function(err,row) {
 									if (!err) {
-										var total_data = {};
-										total_data.total_prices = 0;
-										total_data.total_items = 0;
-										if (content.length == 0) {
-											return reply({"success":true,"message":"ok","service_info":service_info,"shopping_carts":results,"total_data":total_data});
-										}
-										for (var i = 0; i < content.length; i++) {
-											total_data.total_items = total_data.total_items + content[i].total_items;
-											total_data.total_prices = total_data.total_prices + content[i].total_items * content[i].per_price;
-										}
-										return reply({"success":true,"message":"ok","service_info":service_info,"shopping_carts":results,"total_data":total_data});
+										return reply({"success":true,"message":"ok","service_info":service_info,"shopping_carts":row.shopping_carts,"products":row.products,"total_data":row.total_data});
 									}else {
-										return reply({"success":false,"message":results.message,"service_info":service_info});
+										return reply({"success":false,"message":row.message,"service_info":service_info});
 									}
 								});
 							}else {
@@ -448,6 +480,9 @@ exports.register = function(server, options, next){
 				});
 			}
 		},
+
+
+
 		//购物车下订单页面
 		{
 			method: 'GET',
