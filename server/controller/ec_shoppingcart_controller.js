@@ -15,7 +15,6 @@ var do_get_method = function(url,cb){
 //所有post调用接口方法
 var do_post_method = function(url,data,cb){
 	uu_request.request(url, data, function(err, response, body) {
-		console.log(body);
 		if (!err && response.statusCode === 200) {
 			do_result(false, body, cb);
 		} else {
@@ -74,7 +73,76 @@ var search_cart_products_list = function(shopping_carts,cb) {
 		}
 	});
 };
+//查询购物车商品信息改带分单的
+var search_cart_products_list2 = function(shopping_carts,cb) {
+	var product_ids = [];
+	var carts_selected = [];
+	for (var i = 0; i < shopping_carts.length; i++) {
+		if (shopping_carts[i].is_selected == 1) {
+			carts_selected.push(shopping_carts[i]);
+			product_ids.push(shopping_carts[i].product_id);
+		}
+	}
+	search_products_list(JSON.stringify(product_ids),function(err,content){
+		if (!err) {
+			var products_map = {};
+			var mendian_map = {};
+			var mendian = [];
+			for (var i = 0; i < content.products.length; i++) {
+				var product = content.products[i];
+				products_map[product.id] = product;
+				if (!mendian_map[product.origin]) {
+					mendian_map[product.origin] = [];
+					mendian.push(product.origin);
+				}
+				mendian_map[product.origin].push(product);
+			}
+			var carts_map = {};
+			for (var i = 0; i < carts_selected.length; i++) {
+				carts_map[carts_selected[i].product_id] = carts_selected[i];
+			}
+			var prices_map = {};
+			var items_map = {};
+			var weight_map = {};
+			for (var i = 0; i < mendian.length; i++) {
+				if (mendian_map[mendian[i]]) {
+					for (var j = 0; j < mendian_map[mendian[i]].length; j++) {
+						var product = mendian_map[mendian[i]][j];
+						if (carts_map[product.id]) {
+							if (!prices_map[mendian[i]]) {
+								prices_map[mendian[i]] =0;
+							}
+							if (!items_map[mendian[i]]) {
+								items_map[mendian[i]] =0;
+							}
+							if (!weight_map[mendian[i]]) {
+								weight_map[mendian[i]] =0;
+							}
+							prices_map[mendian[i]] = prices_map[mendian[i]] + carts_map[product.id].per_price*carts_map[product.id].total_items;
 
+							items_map[mendian[i]] = items_map[mendian[i]] + carts_map[product.id].total_items;
+							if (!products_map[product.id].weight) {
+								weight_map[mendian[i]] = weight_map[mendian[i]] +0;
+							}else {
+								weight_map[mendian[i]] = weight_map[mendian[i]] + products_map[product.id].weight*carts_map[product.id].total_items;
+							}
+
+						}
+					}
+				}
+			}
+			var total_data = {
+				"total_items":items_map,
+				"total_weight":weight_map,
+				"total_prices":prices_map,
+				"mendian" : mendian
+			};
+			cb(false,{"message":"ok","shopping_carts":shopping_carts,"products":products_map,"total_data":total_data});
+		}else {
+			cb(true,null);
+		}
+	});
+};
 exports.register = function(server, options, next){
 	//新增购物车
 	var add_shopping_cart = function(product_id, per_price, total_items, total_prices, cart_code,person_id,sku_id,cb){
@@ -338,8 +406,6 @@ exports.register = function(server, options, next){
 								ids.push(no_persons[i].id);
 							}
 						}
-						console.log("ids:"+ids);
-						console.log("dele_ids:"+dele_ids);
 						var ep =  eventproxy.create("updates","deletes",function(updates,deletes){
 							return reply({"success":true,"message":"ok","service_info":service_info});
 						});
@@ -394,7 +460,6 @@ exports.register = function(server, options, next){
 			path: '/find_person_cart',
 			handler: function(request, reply){
 				var person_id = request.query.person_id;
-				console.log("person_id:"+person_id);
 
 				find_person_cart(person_id,function(err,row) {
 					if (!err) {
@@ -482,7 +547,6 @@ exports.register = function(server, options, next){
 		},
 
 
-
 		//购物车下订单页面
 		{
 			method: 'GET',
@@ -495,7 +559,7 @@ exports.register = function(server, options, next){
 				}
 				server.plugins['models'].shopping_carts.search_carts_by_ids(JSON.parse(ids),function(err,results){
 					if (!err) {
-						search_cart_products_list(results,function(err,row) {
+						search_cart_products_list2(results,function(err,row) {
 							if (!err) {
 								return reply({"success":true,"message":"ok","service_info":service_info,"shopping_carts":row.shopping_carts,"products":row.products,"total_data":row.total_data});
 							}else {
@@ -540,8 +604,6 @@ exports.register = function(server, options, next){
 				}else {
 					return reply({"success":false,"message":"params is null","service_info":service_info})
 				}
-				console.log("person_id:"+person_id);
-				console.log("cart_code:"+cart_code);
 				server.plugins['models'].shopping_carts.delete_shopping_carts2(person_id,cart_code,function(err,results){
 					if (!err) {
 						return reply({"success":true,"service_info":service_info});
