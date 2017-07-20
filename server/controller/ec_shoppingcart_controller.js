@@ -559,6 +559,31 @@ exports.register = function(server, options, next){
 				}
 				server.plugins['models'].shopping_carts.search_carts_by_ids(JSON.parse(ids),function(err,results){
 					if (!err) {
+						search_cart_products_list(results,function(err,row) {
+							if (!err) {
+								return reply({"success":true,"message":"ok","service_info":service_info,"shopping_carts":row.shopping_carts,"products":row.products,"total_data":row.total_data});
+							}else {
+								return reply({"success":false,"message":row.message,"service_info":service_info});
+							}
+						});
+					}else {
+						return reply({"success":false,"message":results.message,"service_info":service_info});
+					}
+				});
+			}
+		},
+		//购物车下订单页面
+		{
+			method: 'GET',
+			path: '/search_selected_carts2',
+			handler: function(request, reply){
+				var person_id = request.query.person_id;
+				var ids = request.query.ids;
+				if (!person_id || !ids) {
+					return reply({"success":false,"message":"params wrong","service_info":service_info});
+				}
+				server.plugins['models'].shopping_carts.search_carts_by_ids(JSON.parse(ids),function(err,results){
+					if (!err) {
 						search_cart_products_list2(results,function(err,row) {
 							if (!err) {
 								return reply({"success":true,"message":"ok","service_info":service_info,"shopping_carts":row.shopping_carts,"products":row.products,"total_data":row.total_data});
