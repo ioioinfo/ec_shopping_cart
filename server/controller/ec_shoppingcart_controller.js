@@ -674,7 +674,7 @@ exports.register = function(server, options, next){
 			handler: function(request, reply){
 				var person_id = request.query.person_id;
 				var cart_code = request.query.cart_code;
-				if (person_id) {
+				if (person_id && person_id!="") {
 					find_person_cart(person_id,function(err,row) {
 						if (!err) {
 							return reply({"success":true,"message":"ok","service_info":service_info,"shopping_carts":row.shopping_carts,"products":row.products,"total_data":row.total_data});
