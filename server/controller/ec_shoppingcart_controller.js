@@ -44,6 +44,7 @@ var search_products_list = function(product_ids,cb){
 var search_cart_products_list = function(shopping_carts,cb) {
 	var product_ids = [];
 	var carts_selected = [];
+
 	for (var i = 0; i < shopping_carts.length; i++) {
 		product_ids.push(shopping_carts[i].product_id);
 		if (shopping_carts[i].is_selected == 1) {
@@ -63,9 +64,13 @@ var search_cart_products_list = function(shopping_carts,cb) {
 			total_data.total_items = 0;
 			total_data.total_weight = 0;
 			for (var i = 0; i < carts_selected.length; i++) {
-				total_data.total_items = total_data.total_items + carts_selected[i].total_items;
-				total_data.total_prices = total_data.total_prices + carts_selected[i].total_items * carts_selected[i].per_price;
-				total_data.total_weight = total_data.total_weight + products_map[carts_selected[i].product_id].weight * carts_selected[i].total_items;
+				if (products_map[carts_selected[i].product_id]) {
+					total_data.total_items = total_data.total_items + carts_selected[i].total_items;
+					total_data.total_prices = total_data.total_prices + carts_selected[i].total_items * carts_selected[i].per_price;
+					total_data.total_weight = total_data.total_weight + products_map[carts_selected[i].product_id].weight * carts_selected[i].total_items;
+				} else {
+					carts_selected[i].deleted = true;
+				}
 			}
 			cb(false,{"message":"ok","shopping_carts":shopping_carts,"products":products_map,"total_data":total_data});
 		}else {
