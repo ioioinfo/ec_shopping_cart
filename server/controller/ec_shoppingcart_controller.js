@@ -602,12 +602,12 @@ exports.register = function(server, options, next){
 				});
 			}
 		},
-		//删除选中购物车
+		//删除选中购物车商品
 		{
-			method: 'GET',
+			method: 'POST',
 			path: '/delete_shopping_carts',
 			handler: function(request, reply){
-				var ids = request.query.ids;
+				var ids = request.payload.ids;
 				if (!ids) {
 					return reply({"success":false,"message":"params wrong","service_info":service_info});
 				}
@@ -734,11 +734,11 @@ exports.register = function(server, options, next){
 		},
 		//购物车 数量修改
 		{
-			method: 'GET',
-			path: '/update_shopping_carts',
+			method: 'POST',
+			path: '/update_cart_number',
 			handler: function(request, reply){
-				var ids = request.query.ids;
-				var num = request.query.num;
+				var ids = request.payload.ids;
+				var num = request.payload.num;
 				if (!ids ||!num) {
 					return reply({"success":false,"message":"params wrong","service_info":service_info});
 				}
